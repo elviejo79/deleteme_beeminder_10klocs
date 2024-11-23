@@ -1,0 +1,21 @@
+name: Run Nushell Script
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  run_nushell_script:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Nushell
+        run: |
+          cargo install nu
+          cargo install tokei --features all
+
+      - name: Run Nushell Script
+        shell: nu {0}
+        run: |
+          post_to_beeminder.nu
