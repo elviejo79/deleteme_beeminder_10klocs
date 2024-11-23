@@ -29,4 +29,4 @@ jobs:
           greeting hustcer
       - name: post LoCs to beeminder
         shell: nu {0}
-        run: ./post_to_beeminder
+        run: ./post_to_beeminder.nu
