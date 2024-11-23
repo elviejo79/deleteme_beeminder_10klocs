@@ -28,5 +28,7 @@ jobs:
           }
           greeting hustcer
       - name: post LoCs to beeminder
+        env:
+          BEEMINDER_TOKEN: ${{ secrets.BEEMINDER_TOKEN }}
         shell: nu {0}
         run: ./post_to_beeminder.nu

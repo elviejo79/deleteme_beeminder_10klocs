@@ -1,0 +1,6 @@
+{
+  "auth_token": "should_be_in_secrets_beeminder_token",
+  "timestamp": "1732385960",
+  "value": "88",
+  "comment": "link to the github commit?"
+}
