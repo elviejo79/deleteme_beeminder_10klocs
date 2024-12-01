@@ -1,0 +1,146 @@
+<meta charset="utf-8" emacsmode="-*- markdown -*-">
+
+The information for this section is taken from:
+
+https://objective.st/Language
+
+
+# Connecting
+Components can be connected using the right arrow →.
+
+For example, the following will connect a text field you have created (assumed to be stored in the variable text) to stdout.
+
+```bash
+text → stdout.
+```
+
+The right arrow is polymorphic: in the previous exampe, it connected the two components via their default in and out ports, which happned to be compatible.
+
+The text field can be created as follows:
+
+```
+text ← #NSTextField{ #frame: (180@24)  }.
+```
+
+Combining these two lines of code creates a complete program that will show a text field and echo the user entered text to the console.
+
+# How to implement the connecting mechanism?
+
+In Eiffel we could implement the connect with an Event_type
+
+For example the previous idea of
+
+```
+text -> stdout
+
+```
+
+In eiffel we could create a
+simple testcase such as:
+
+Alice connects with Bob.
+And bob keeps synchronized with Alice.
+
+~~~ Eiffel
+	TEST_ACTION_CELL
+			-- can connect and remain in sync
+		local
+			Alice, Bob: ACTION_CELL [STRING]
+		do
+			create Alice.put ("")
+			create Bob.put ("")
+
+			Alice.connect (agent Bob.put)
+			Alice.put ("1st text")
+
+			assert ("bob got updated with ilecs value", Bob.item ~ Alice.item)
+
+			Alice.put ("2nd text")
+			assert ("they remain in sync", Bob.item ~ Alice.item)
+		end
+~~~
+
+With this example we can start thinking about what we need.
+
+## ACTION_CELL
+
+An ACTION_CELL is almost like a CELL,
+except that it's updatde method is a little different.
+And it is CONNECTABLE to other components
+
+~~~
+class
+	ACTION_CELL [G]
+
+inherit
+	CELL [G]
+		redefine
+			put
+		end
+	CONNECTABLE [G]
+~~~
+
+
+It's update value is like the originar (Precursor), but when it finishes it notifies it's listeners.
+
+~~~
+	put (v: G)
+		-- update value and notify listeners
+		do
+			Precursor (v)
+			tell_listeners (v)
+		end
+~~~
+
+
+## What is something CONNECTABLE
+
+Now what defines that something is CONNECTABLE?
+
+it means that you can connect to it.
+
+~~~
+feature
+	connect(aListener: PROCEDURE [EVENT_DATA])
+		require
+			not_listening_already: not listeners.has (aListener)
+		do
+			listeners.extend (aListener)
+		ensure
+			ready_to_listen: listeners.has (aListener)
+		end
+~~~
+
+And that you are that the list of listeners.
+
+~~~
+feature --collection of listeners
+	listeners: ACTION_SEQUENCE [EVENT_DATA]
+		attribute
+			create Result.default_create
+		end
+~~~
+
+And that you tell the audience listeners,
+when the thing makes the action.
+
+~~~
+feature
+    -- after upadating tell listeners
+    tell_listeners (data: EVENT_DATA)
+		do
+			listeners.call (data)
+		end
+~~~
+
+As you can see.
+We have actually used two kinds of inheritance in order to implement this pattern.
+
+in ACTION_CELL we have used multiple inheritance. We want it to hove two roles.
+One is as a storage of values a CELL
+and the other is as CONNECTABLE thing,
+that notify it's audience.
+
+
+<link rel="stylesheet" href="https://morgan3d.github.io/markdeep/latest/latex.css?">
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden}</style><script src="https://morgan3d.github.io/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>
